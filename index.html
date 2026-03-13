@@ -607,15 +607,47 @@
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Titolo Generale</label>
-      <input class="form-input" id="post-title" placeholder="Es. Lancio VITRA BK100" />
+    <!-- TITOLI SEPARATI PER TIPO -->
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#16A34A; color:white; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px;">POST</span>
+          Titolo Post
+        </label>
+        <input class="form-input" id="title-post" placeholder="Es. Lancio VITRA BK100" />
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#7C3AED; color:white; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px;">STORIES</span>
+          Titolo Stories
+        </label>
+        <input class="form-input" id="title-stories" placeholder="Es. Stories lancio prodotto" />
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#0369A1; color:white; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px;">VIDEO</span>
+          Titolo Video
+        </label>
+        <input class="form-input" id="title-video" placeholder="Es. Reel unboxing VITRA" />
+      </div>
     </div>
 
-    <!-- NUOVO CAMPO COPY -->
-    <div class="form-group">
-      <label class="form-label">Copy / Testo del Post</label>
-      <textarea class="form-textarea" id="post-copy" placeholder="Scrivi qui la caption, gli hashtag, ecc..."></textarea>
+    <!-- COPY SEPARATI PER POST E VIDEO -->
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#16A34A; color:white; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px;">POST</span>
+          Copy / Caption Post
+        </label>
+        <textarea class="form-textarea" id="copy-post" placeholder="Scrivi la caption del post, hashtag, ecc..."></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+          <span style="background:#0369A1; color:white; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px;">VIDEO</span>
+          Copy / Caption Video
+        </label>
+        <textarea class="form-textarea" id="copy-video" placeholder="Scrivi la descrizione del video, hashtag, ecc..."></textarea>
+      </div>
     </div>
 
     <!-- AREA UPLOAD MULTIPLO CON STATI SEPARATI -->
@@ -681,10 +713,11 @@ let currentData = {};
 
 function initDefaultData() {
   return {
-    copy: '',
-    post: { img: null, status: 'not-ready', scheduled: 'not-scheduled' },
-    stories: { img: null, status: 'not-ready', scheduled: 'not-scheduled' },
-    video: { img: null, status: 'not-ready', scheduled: 'not-scheduled' } 
+    copyPost:  '',
+    copyVideo: '',
+    post:    { img: null, status: 'not-ready', scheduled: 'not-scheduled', title: '' },
+    stories: { img: null, status: 'not-ready', scheduled: 'not-scheduled', title: '' },
+    video:   { img: null, status: 'not-ready', scheduled: 'not-scheduled', title: '' }
   };
 }
 
@@ -1056,21 +1089,20 @@ function renderCell(date, otherMonth, today) {
 
     let rowsHtml = '';
     activeTypes.forEach(item => {
-      let label = item.type === 'post' ? 'P' : (item.type === 'stories' ? 'S' : 'V');
-      let color = item.type === 'post' ? 'var(--brand-color)' : (item.type === 'stories' ? '#E87722' : '#2196F3');
+      let label = item.type === 'post' ? 'POST' : (item.type === 'stories' ? 'STORIES' : 'VIDEO');
+      let color = item.type === 'post' ? '#16A34A' : (item.type === 'stories' ? '#7C3AED' : '#0369A1');
+      let typeTitle = item.data.title || '';
       
       let b1 = item.data.status === 'ready' ? '<span class="badge ready">Pronto</span>' : '<span class="badge not-ready">Non Pronto</span>';
       let b2 = item.data.scheduled === 'scheduled' ? '<span class="badge scheduled">Prog.</span>' : '<span class="badge not-scheduled">No Prog.</span>';
 
       rowsHtml += `
-        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-           <div style="width: 28px; height: 40px; flex-shrink:0; border-radius:4px; background: var(--surface-hover); border:1px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; color:var(--text-muted); position:relative;">
-              ${item.data.img ? `<img src="${item.data.img}" style="width:100%;height:100%;object-fit:cover;">` : label}
-              <div style="position:absolute; bottom:0; right:0; background:${color}; color:white; font-size:8px; padding:1px 3px; border-radius: 4px 0 0 0;">${label}</div>
-           </div>
-           <div style="display:flex; flex-direction:column; gap:4px;">
-              <div style="display:flex; gap:4px;">${b1}${b2}</div>
-           </div>
+        <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px; padding:6px 8px; border-radius:6px; background:var(--surface-hover); border-left:3px solid ${color};">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="background:${color}; color:white; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; flex-shrink:0;">${label}</span>
+            ${typeTitle ? `<span style="font-size:11px; font-weight:600; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(typeTitle)}</span>` : ''}
+          </div>
+          <div style="display:flex; gap:4px;">${b1}${b2}</div>
         </div>
       `;
     });
@@ -1081,7 +1113,6 @@ function renderCell(date, otherMonth, today) {
 
     postsHtml += `<div class="post-card" draggable="true" ondragstart="handleDragStart(event, '${dStr}', ${i})" ondragend="handleDragEnd(event)" style="border-left-color: ${cardStatusColor}" onclick="event.stopPropagation(); editPost('${dStr}', ${i})">
       <div class="post-card-inner">
-        <div class="post-title">${escHtml(p.title || 'Post senza titolo')}</div>
         <div style="display:flex; flex-direction:column;">${rowsHtml}</div>
       </div>
     </div>`;
@@ -1191,7 +1222,9 @@ function renderUploadAreas() {
       <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; background: var(--surface-hover);">
         
         <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-           <span>${label}</span>
+           <span style="display:flex; align-items:center; gap:8px;">
+             <span style="background:${type === 'post' ? '#16A34A' : type === 'stories' ? '#7C3AED' : '#0369A1'}; color:white; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px;">${label.toUpperCase()}</span>
+           </span>
            <div style="display: flex; gap: 8px;">
                ${data.img ? `<button type="button" onclick="document.getElementById('img-input-${type}').click()" style="background:var(--surface); border:1px solid var(--border); color:var(--text-main); cursor:pointer; font-size:11px; font-weight:600; padding:4px 8px; border-radius:4px; transition:all 0.2s;">🔄 Cambia Foto</button>` : ''}
                ${data.img ? `<button type="button" onclick="removeImage('${type}')" style="background:var(--red-bg); border:1px solid var(--red-border); color:var(--red-text); cursor:pointer; font-size:11px; font-weight:600; padding:4px 8px; border-radius:4px; transition:all 0.2s;">🗑 Rimuovi</button>` : ''}
@@ -1271,13 +1304,18 @@ function openModal(dateStr, editIndex = null) {
 
   const [y, m, d] = dateStr.split('-');
   document.getElementById('modal-title').textContent = isEdit ? `Modifica Contenuti — ${parseInt(d)} ${MONTHS_IT[parseInt(m)-1]}` : `Nuovi Contenuti — ${parseInt(d)} ${MONTHS_IT[parseInt(m)-1]}`;
-  document.getElementById('post-title').value = post?.title || '';
   
   // Popola la struttura dati interna
   currentData = parsePostData(post);
   
+  // Popola i 3 titoli separati
+  document.getElementById('title-post').value    = currentData.post.title    || post?.title || '';
+  document.getElementById('title-stories').value = currentData.stories.title || '';
+  document.getElementById('title-video').value   = currentData.video.title   || '';
+  
   // Popola il campo copy
-  document.getElementById('post-copy').value = currentData.copy || '';
+  document.getElementById('copy-post').value  = currentData.copyPost  || currentData.copy || '';
+  document.getElementById('copy-video').value = currentData.copyVideo || '';
 
   renderUploadAreas();
 
@@ -1292,18 +1330,32 @@ function closeModal() { document.getElementById('modal-overlay').classList.remov
 function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
 async function savePost() {
-  const title = document.getElementById('post-title').value.trim();
-  if (!title) { document.getElementById('post-title').focus(); return; }
+  const titlePost    = document.getElementById('title-post').value.trim();
+  const titleStories = document.getElementById('title-stories').value.trim();
+  const titleVideo   = document.getElementById('title-video').value.trim();
+  
+  if (!titlePost && !titleStories && !titleVideo) { 
+    document.getElementById('title-post').focus(); 
+    showToast('Inserisci almeno un titolo', 'error');
+    return; 
+  }
 
   const key = `${state.brand}|${modalDate}`;
   if (!state.posts[key]) state.posts[key] = [];
 
   let post = modalEditIndex !== null ? { ...state.posts[key][modalEditIndex] } : {};
 
-  post.title = title;
+  // Salva i titoli dentro currentData
+  currentData.post.title    = titlePost;
+  currentData.stories.title = titleStories;
+  currentData.video.title   = titleVideo;
   
-  // Salviamo anche il copy
-  currentData.copy = document.getElementById('post-copy').value.trim();
+  // Il titolo principale della card è quello del post (o il primo disponibile)
+  post.title = titlePost || titleStories || titleVideo;
+  
+  // Salva i 2 copy separati
+  currentData.copyPost  = document.getElementById('copy-post').value.trim();
+  currentData.copyVideo = document.getElementById('copy-video').value.trim();
   post.image = JSON.stringify(currentData);
   
   if (currentData.post.status === 'ready' || currentData.stories.status === 'ready' || currentData.video.status === 'ready') {
